@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "AssistX - Smart AI Reply",
+  "version": "0.1.0",
+  "description": "Smart AI replies for Twitter/X using ZhipuAI GLM model.",
+  "permissions": ["storage", "activeTab", "scripting", "alarms", "sidePanel"],
+  "host_permissions": [
+    "https://twitter.com/*",
+    "https://x.com/*",
+    "https://open.bigmodel.cn/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://twitter.com/*", "https://x.com/*"],
+      "js": ["content/loader.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "side_panel": {
+    "default_path": "ui/sidepanel.html"
+  },
+  "action": {
+    "default_title": "Open AssistX Side Panel"
+  },
+  "icons": {
+    "16": "assets/icon.png",
+    "48": "assets/icon.png",
+    "128": "assets/icon.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content/index.js", "content/twitter.js", "content/utils.js"],
+      "matches": ["https://twitter.com/*", "https://x.com/*"]
+    }
+  ]
+}

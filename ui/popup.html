@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>AssistX Settings</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <img src="../assets/icon.png" alt="AssistX" class="logo" />
+        <h1>AssistX</h1>
+        <button id="layoutToggle" class="layout-toggle" title="切换到侧边栏模式">
+          <svg class="icon-sidebar" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="15" y1="3" x2="15" y2="21"/>
+          </svg>
+        </button>
+      </header>
+
+      <main>
+        <div class="form-group">
+          <label for="apiKey">ZhipuAI API Key</label>
+          <input
+            type="password"
+            id="apiKey"
+            placeholder="Enter your API Key (id.secret)"
+          />
+          <p class="hint">
+            Get your key from
+            <a
+              href="https://open.bigmodel.cn/usercenter/apikeys"
+              target="_blank"
+              >open.bigmodel.cn</a
+            >
+          </p>
+        </div>
+
+        <button id="saveBtn">Save Settings</button>
+
+        <div id="status" class="status"></div>
+      </main>
+
+      <footer>
+        <p>Powered by GLM-4</p>
+      </footer>
+    </div>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
