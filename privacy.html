@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy - AssistX</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 720px; margin: 40px auto; padding: 20px; color: #333; line-height: 1.7; }
+  h1 { border-bottom: 2px solid #1d9bf0; padding-bottom: 12px; }
+  h2 { color: #1d9bf0; margin-top: 32px; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid #e1e8ed; }
+  th { background: #f7f9fa; font-weight: 600; }
+  code { background: #f0f2f5; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  .last-updated { color: #8899a6; font-size: 0.9em; margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<h1>Privacy Policy - AssistX</h1>
+<p><strong>Effective Date:</strong> April 29, 2026<br>
+<strong>Last Updated:</strong> April 29, 2026</p>
+
+<h2>1. Overview</h2>
+<p>AssistX ("we", "our", or "the Extension") is a Chrome extension that provides AI-powered reply suggestions for Twitter/X. We are committed to protecting your privacy and being transparent about how we handle your data.</p>
+
+<h2>2. Information We Collect</h2>
+
+<table>
+  <tr><th>Data Type</th><th>Purpose</th><th>Storage</th><th>Shared With</th></tr>
+  <tr>
+    <td>API Keys</td>
+    <td>To authenticate with your chosen AI service provider</td>
+    <td>Locally via <code>chrome.storage.local</code></td>
+    <td>Sent only to your configured AI API endpoint</td>
+  </tr>
+  <tr>
+    <td>Settings & Preferences</td>
+    <td>To remember your model selection, language, UI preferences, custom prompts</td>
+    <td>Locally via <code>chrome.storage.local</code></td>
+    <td>Not shared</td>
+  </tr>
+  <tr>
+    <td>Tweet Content (temporary)</td>
+    <td>To generate contextually relevant AI replies</td>
+    <td>In memory only during processing</td>
+    <td>Sent only to your configured AI API endpoint as part of the prompt</td>
+  </tr>
+</table>
+
+<h2>3. Information We Do NOT Collect</h2>
+<ul>
+  <li>No user accounts or personal identifiers</li>
+  <li>No usage analytics or tracking</li>
+  <li>No cookies or third-party trackers</li>
+  <li>No data sent to our servers</li>
+  <li>No access to your browsing history beyond active Twitter/X tabs</li>
+</ul>
+
+<h2>4. How Data Is Processed</h2>
+<ol>
+  <li><strong>Tweet Extraction:</strong> When you trigger a reply generation, the extension reads the currently visible tweet content from the active Twitter/X tab.</li>
+  <li><strong>API Call:</strong> The tweet content (as a prompt) and your API key are sent directly to the AI service endpoint you have configured (e.g., ZhipuAI, OpenAI, Anthropic).</li>
+  <li><strong>Response:</strong> The AI-generated reply is displayed in the extension's UI. No response data is stored persistently.</li>
+</ol>
+
+<h2>5. Third-Party Services</h2>
+<p>This extension sends data to third-party AI service providers that you explicitly configure:</p>
+<ul>
+  <li><strong>ZhipuAI (bigmodel.cn)</strong> — When using GLM models</li>
+  <li><strong>OpenAI</strong> — When using GPT models</li>
+  <li><strong>Anthropic</strong> — When using Claude models</li>
+  <li><strong>Other providers</strong> — Any custom API endpoint you configure</li>
+</ul>
+<p>Each provider's own privacy policy applies to data sent to their services. We recommend reviewing their policies before use.</p>
+
+<h2>6. Data Retention</h2>
+<p>All data stored by this extension (<code>chrome.storage.local</code>) remains on your local device until:</p>
+<ul>
+  <li>You actively delete it through the extension's settings</li>
+  <li>You uninstall the extension (Chrome will remove all stored data)</li>
+  <li>You clear your browser data</li>
+</ul>
+
+<h2>7. Your Rights</h2>
+<ul>
+  <li><strong>Export:</strong> You can view and copy all stored settings from the extension's settings panel.</li>
+  <li><strong>Delete:</strong> Uninstalling the extension immediately removes all stored data.</li>
+  <li><strong>Opt-out:</strong> Simply do not enter an API key or uninstall the extension.</li>
+</ul>
+
+<h2>8. Security</h2>
+<ul>
+  <li>API keys are stored using Chrome's secure <code>storage.local</code> API, which isolates data per extension.</li>
+  <li>All API communication uses HTTPS/TLS encryption.</li>
+  <li>The extension does not include any remote code loading or update mechanisms outside of the Chrome Web Store.</li>
+</ul>
+
+<h2>9. Children's Privacy</h2>
+<p>This extension is not directed at children under 13. We do not knowingly collect personal information from children.</p>
+
+<h2>10. Changes to This Policy</h2>
+<p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated revision date.</p>
+
+<h2>11. Contact</h2>
+<p>If you have questions about this Privacy Policy, please open an issue on our GitHub repository:<br>
+<a href="https://github.com/hunterlarcuad/x-reply-assist/issues">https://github.com/hunterlarcuad/x-reply-assist/issues</a></p>
+
+<p class="last-updated">Last updated: April 29, 2026</p>
+
+</body>
+</html>

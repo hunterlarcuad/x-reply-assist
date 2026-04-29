@@ -7,8 +7,7 @@
   "host_permissions": [
     "https://twitter.com/*",
     "https://x.com/*",
-    "https://open.bigmodel.cn/*",
-    "<all_urls>"
+    "https://open.bigmodel.cn/*"
   ],
   "background": {
     "service_worker": "background/index.js",
@@ -28,9 +27,10 @@
     "default_title": "Open AssistX Side Panel"
   },
   "icons": {
-    "16": "assets/icon.png",
-    "48": "assets/icon.png",
-    "128": "assets/icon.png"
+    "16": "assets/icon-16.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png",
+    "448": "assets/icon-448.png"
   },
   "web_accessible_resources": [
     {
