@@ -13,9 +13,6 @@
     "https://api.anthropic.com/*",
     "https://api.deepseek.com/*"
   ],
-  "optional_host_permissions": [
-    "https://*/*"
-  ],
   "background": {
     "service_worker": "background/index.js",
     "type": "module"
