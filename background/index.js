@@ -35,19 +35,30 @@ async function handleGetModels(sendResponse) {
 
 async function handleGenerateReply(request, sendResponse) {
   try {
-    const { prompt, model, protocol } = request;
-    const { selectedModel, provider, providerConfigs } = await storage.get(['selectedModel', 'provider', 'providerConfigs']);
+    const { prompt, model, protocol, provider: reqProvider, tweetText, commandText, wordLimit } = request;
+    const { selectedModel, provider: storageProvider, providerConfigs } = await storage.get(['selectedModel', 'provider', 'providerConfigs']);
     
-    // 自动寻找当前服务商的协议
-    const currentProvider = provider || 'glm';
+    // 优先使用请求中的 provider，防止存储同步延迟
+    const currentProvider = reqProvider || storageProvider || 'glm';
     const fallbackCfg = resolveProviderCfg(providerConfigs, currentProvider, protocol);
     const targetProtocol = protocol || fallbackCfg.protocol || 'openai';
     const cfg = resolveProviderCfg(providerConfigs, currentProvider, targetProtocol);
     const targetModel = model || selectedModel || cfg.selectedModel || 'glm-4.7-flash';
 
-    if (!prompt) throw new Error('Prompt is required');
+    // 如果没有 prompt，尝试构造 (针对 sidebar.js 等旧调用)
+    let finalPrompt = prompt;
+    if (!finalPrompt && tweetText) {
+      const { buildReplyPrompt } = await import('./utils.js').catch(() => ({})); 
+      if (buildReplyPrompt) {
+        finalPrompt = buildReplyPrompt({ tweetText, commandText, wordLimit: wordLimit || 70 });
+      } else {
+        finalPrompt = `Reply to this tweet: ${tweetText}\nInstructions: ${commandText || 'friendly'}`;
+      }
+    }
 
-    const reply = await generateReply(prompt, targetModel, currentProvider, targetProtocol);
+    if (!finalPrompt) throw new Error('Prompt is required');
+
+    const reply = await generateReply(finalPrompt, targetModel, currentProvider, targetProtocol);
     sendResponse({ success: true, reply });
   } catch (error) {
     console.error('Generation failed:', error);

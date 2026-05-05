@@ -207,6 +207,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     return { ok: !!data?.text, reason: data?.text ? 'ok' : 'not_found', data };
   }
 
+  async function ensureHostPermission(url) {
+    if (!url) return true; 
+    try {
+      const urlObj = new URL(url);
+      const origin = urlObj.origin + '/*';
+      const hasPermission = await chrome.permissions.contains({ origins: [origin] });
+      if (!hasPermission) {
+        return await chrome.permissions.request({ origins: [origin] });
+      }
+      return true;
+    } catch (e) {
+      console.error('Permission check failed:', e);
+      return false;
+    }
+  }
+
   function parseCustomModels(rawValue) {
     if (!rawValue) return [];
     return rawValue
@@ -768,8 +784,20 @@ function refreshProviderDatalist() {
       }
       const finalPrompt = (promptPreviewTextarea.style.display === 'block' && promptPreviewTextarea.value.length > 50) 
         ? promptPreviewTextarea.value : buildMultiReplyPrompt({ tweetText, commands, wordLimit: parseInt(wordLimitInput.value) || 70, replyLanguage: replyLangSelect.value });
+      
+      const baseUrl = baseUrlInput.value.trim();
+      const hasPerm = await ensureHostPermission(baseUrl);
+      if (!hasPerm) {
+          placeholder.innerHTML = `<div style="padding:20px; text-align:center; color:#e0245e;">${dict.gen_error}: Missing permission for ${baseUrl}</div>`;
+          generationTimeDiv.style.display = 'none';
+          stopCountdown(); return;
+      }
+
       const response = await chrome.runtime.sendMessage({ 
-        type: 'generate_reply', prompt: finalPrompt, model: modelSelect.value, 
+        type: 'generate_reply', 
+        prompt: finalPrompt, 
+        model: modelSelect.value, 
+        provider: (providerSelect.value === 'glm' ? 'glm' : providerNameSelect.value),
         protocol: (providerSelect.value === 'glm' ? 'openai' : protocolTypeSelect.value) 
       });
       if (response?.success) {
@@ -859,6 +887,13 @@ function refreshProviderDatalist() {
     const isMasked = apiKey.includes('*') && apiKey.length > 8;
     const actualKey = isMasked ? (providerConfigs[getCfgKey(lastProvider, protocolTypeSelect.value)]?.apiKey || providerConfigs[lastProvider]?.apiKey || '') : apiKey;
     if (!actualKey) { showStatus(dict.test_failed + 'Key required', 'error'); return; }
+    
+    const hasPerm = await ensureHostPermission(baseUrl);
+    if (!hasPerm) {
+        showStatus(dict.test_failed + 'Permission denied', 'error');
+        return;
+    }
+
     testBtn.disabled = true; testBtn.textContent = dict.testing_conn;
     try {
       const response = await chrome.runtime.sendMessage({ 
