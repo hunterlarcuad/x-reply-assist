@@ -3,7 +3,7 @@
   "name": "AssistX - Smart AI Reply",
   "version": "0.1.0",
   "description": "Smart AI replies for Twitter/X using ZhipuAI GLM model.",
-  "permissions": ["storage", "activeTab", "scripting", "alarms", "sidePanel"],
+  "permissions": ["storage", "activeTab", "scripting", "sidePanel"],
   "host_permissions": [
     "https://twitter.com/*",
     "https://x.com/*",
