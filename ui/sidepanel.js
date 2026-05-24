@@ -11,22 +11,23 @@ const i18n = {
   zh: {
     tab_reply: '回复', tab_commands: '指令库', tab_settings: '设置',
     post_title: '📝 当前帖子', post_placeholder: '正在提取推文内容...', post_not_found: '未找到推文', post_hint: '请在推特页面使用', post_error: '推文获取失败',
-    ai_title: '⚡ 智能回复生成', prompt_preview: '指令预览', word_limit: '字数限制:', word_char: '字符', time_cost: '耗时:',
+    ai_title: '⚡ 智能回复生成', prompt_preview: '指令预览', word_limit: '字数限制:', word_char: '字', time_cost: '耗时:',
     gen_btn: '生成回复内容', gen_thinking: '<div class="thinking-loader"><div class="thinking-dots"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div><div class="thinking-text">AI 正在思考...</div></div>', gen_error: '❌ 生成失败', gen_need_post: '❌ 未获取到帖子内容',
     btn_copy: '复制', btn_insert: '插入', btn_publish: '发布',
     provider_label: '服务商', provider_name_label: '服务商名称', available_models_label: '可用模型列表', protocol_type_label: '协议类型', api_url_label: 'API Base URL', cmd_title: '🎨 自定义指令', cmd_search: '搜索指令模板...', cmd_save: '保存指令库',
     settings_account: '👤 当前账号', settings_title: '🔑 API & 模型', lang_label: '界面语言', model_label: 'AI 模型',
-    save_all: '保存全部设置', status_saved: '设置已保存!', status_copied: '已复制!', status_inserted: '已插入!',
+    save_all: '保存全部设置', status_saved: '设置已保存!', status_copied: '复制成功', status_inserted: '插入成功', status_published: '发布成功',
     account_loading: '加载中...', account_unknown: '未检测到账号', cmd_delete: '删除', prompt_new_cmd: '请输入新指令的唯一标识符:',
     test_conn: '测试连接', testing_conn: '测试中...', test_success: '连接成功！', test_failed: '连接失败: ',
     manual_input_toggle: '手动输入推文 (可选)', manual_input_clear: '清空', manual_input_placeholder: '如果自动提取失败，可在此手动输入或粘贴推文内容...',
     reply_lang_label: '回复语言:', reply_lang_auto: '自动', reply_lang_zh: '中文', reply_lang_en: '英语',
-    btn_all: '全部'
+    btn_all: '全部',
+    title_theme: '切换主题', title_refresh_post: '刷新推文', title_clear: '清空', title_expand: '查看完整提示词', title_add_provider: '新增服务商', title_delete_provider: '删除该服务商', title_refresh_models: '刷新模型列表'
   },
   en: {
     tab_reply: 'Reply', tab_commands: 'Library', tab_settings: 'Settings',
     post_title: '📝 Current Tweet', post_placeholder: 'Extracting content...', post_not_found: 'Tweet not found', post_hint: 'Please use on Twitter/X', post_error: 'Failed to fetch tweet',
-    ai_title: '⚡ Smart AI Reply', prompt_preview: 'Prompt Preview', word_limit: 'Word Limit:', word_char: 'chars', time_cost: 'Time:',
+    ai_title: '⚡ Smart AI Reply', prompt_preview: 'Prompt Preview', word_limit: 'Limit:', word_char: 'characters', time_cost: 'Time:',
     gen_btn: 'Generate Reply', gen_thinking: '<div class="thinking-loader"><div class="thinking-dots"><div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div></div><div class="thinking-text">AI Thinking...</div></div>', gen_error: '❌ Failed to generate', gen_need_post: '❌ Tweet content not found',
     btn_copy: 'Copy', btn_insert: 'Insert', btn_publish: 'Post',
     provider_label: 'Provider', provider_name_label: 'Provider Name', available_models_label: 'Available Models', protocol_type_label: 'Protocol Type', api_url_label: 'API Base URL', cmd_title: '🎨 Custom Commands', cmd_search: 'Search templates...', cmd_save: 'Save Library',
@@ -35,8 +36,9 @@ const i18n = {
     account_loading: 'Loading...', account_unknown: 'No account detected', cmd_delete: 'Delete', prompt_new_cmd: 'Enter unique ID:',
     test_conn: 'Test Connection', testing_conn: 'Testing...', test_success: 'Connected!', test_failed: 'Failed: ',
     manual_input_toggle: 'Manual Input (Optional)', manual_input_clear: 'Clear', manual_input_placeholder: 'If auto-extract fails, manually input or paste the tweet here...',
-    reply_lang_label: 'Reply Lang:', reply_lang_auto: 'Auto', reply_lang_zh: 'Chinese', reply_lang_en: 'English',
-    btn_all: 'All'
+    reply_lang_label: 'Lang:', reply_lang_auto: 'Auto', reply_lang_zh: 'Chinese', reply_lang_en: 'English',
+    btn_all: 'All',
+    title_theme: 'Toggle Theme', title_refresh_post: 'Refresh Tweet', title_clear: 'Clear', title_expand: 'View Full Prompt', title_add_provider: 'Add Provider', title_delete_provider: 'Delete Provider', title_refresh_models: 'Refresh Models'
   }
 };
 
@@ -58,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusDiv = document.getElementById('assistx-status');
   const tabBtns = document.querySelectorAll('.tab-btn');
   const refreshPostBtn = document.getElementById('assistx-refreshPost');
+  const refreshAccountBtn = document.getElementById('assistx-refreshAccount');
   const generateBtn = document.getElementById('assistx-generateReply');
   const copyBtn = document.getElementById('assistx-copyReply');
   const insertBtn = document.getElementById('assistx-insertReply');
@@ -92,6 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentReply = '';
   let selectedPromptType = 'all';
   let lastProvider = 'glm';
+  let lastProtocol = 'openai';
   let providerConfigs = {};
   let themeMode = 'system';
   let currentLang = 'zh';
@@ -140,6 +144,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  function updateWordCount() {
+    if (!responseTextarea) return;
+    const count = responseTextarea.value.length;
+    const numEl = document.getElementById('assistx-wordCountNum');
+    if (numEl) numEl.textContent = count;
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
   }
 
   async function safeSendMessage(tabId, message) {
@@ -352,6 +371,10 @@ function refreshProviderDatalist() {
       const key = el.dataset.i18n;
       if (dict[key]) el.textContent = dict[key];
     });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+      const key = el.dataset.i18nTitle;
+      if (dict[key]) el.title = dict[key];
+    });
     commandSearchInput.placeholder = dict.cmd_search;
     manualInputTextarea.placeholder = dict.manual_input_placeholder;
     if (toggleManualInput) {
@@ -370,7 +393,7 @@ function refreshProviderDatalist() {
       const btn = document.createElement('button');
       btn.className = `quick-cmd ${id === selectedPromptType ? 'active' : ''}`;
       btn.dataset.prompt = id;
-      btn.textContent = (id === 'default') ? ('✨ ' + (currentLang === 'zh' ? '默认' : 'Default')) : id;
+      btn.textContent = id;
       if (candidateReplies[id]) btn.style.borderColor = 'var(--primary-color)';
       quickCmdsDiv.appendChild(btn);
     });
@@ -382,6 +405,7 @@ function refreshProviderDatalist() {
     if (selectedPromptType === 'all') {
       singleResultDiv.style.display = 'none'; allResultsDiv.style.display = 'block';
       wordCountDiv.style.display = 'none'; resultStatusDiv.style.display = 'flex';
+      actionsDiv.style.display = 'none';
       renderAllResults();
     } else {
       allResultsDiv.style.display = 'none'; singleResultDiv.style.display = 'block';
@@ -398,25 +422,58 @@ function refreshProviderDatalist() {
     Object.entries(candidateReplies).forEach(([id, text]) => {
       const card = document.createElement('div');
       card.className = 'result-card';
-      const displayName = (id === 'default') ? (currentLang === 'zh' ? '默认' : 'Default') : id;
+      const displayName = id;
       card.innerHTML = `
         <div class="result-card-header">
           <span class="result-card-title">${displayName}</span>
-          <button class="btn-icon copy-card-btn" title="Copy">📋</button>
+          <div class="result-card-btns">
+            <button class="btn-icon copy-card-btn" title="${i18n[currentLang].btn_copy}">📋</button>
+            <button class="btn-icon insert-card-btn" title="${i18n[currentLang].btn_insert}">📥</button>
+            <button class="btn-icon publish-card-btn" title="${i18n[currentLang].btn_publish}">🚀</button>
+          </div>
         </div>
-        <div class="result-card-body">${escapeHtml(text)}</div>
-        <div class="result-card-actions">
-           <button class="btn-secondary use-card-btn" style="padding: 4px 12px; font-size: 11px;">${i18n[currentLang].btn_insert}</button>
-        </div>
+        <textarea class="result-card-body" rows="1">${text}</textarea>
       `;
-      card.querySelector('.copy-card-btn').onclick = () => { navigator.clipboard.writeText(text); showStatus(i18n[currentLang].status_copied, 'success'); };
-      card.querySelector('.use-card-btn').onclick = async () => {
+      
+      const bodyTextarea = card.querySelector('.result-card-body');
+      
+      // 自动调整高度逻辑
+      const autoResize = (ta) => {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+      };
+      // 初始调整
+      setTimeout(() => autoResize(bodyTextarea), 0);
+      // 输入时调整
+      bodyTextarea.addEventListener('input', () => autoResize(bodyTextarea));
+      
+      // 复制功能 (读取实时内容)
+      card.querySelector('.copy-card-btn').onclick = () => { 
+        navigator.clipboard.writeText(bodyTextarea.value); 
+        showStatus(i18n[currentLang].status_copied, 'success'); 
+      };
+      
+      // 插入功能 (读取实时内容)
+      card.querySelector('.insert-card-btn').onclick = async () => {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab?.id) {
-          const ok = await safeSendMessage(tab.id, { type: 'INSERT_REPLY', text: text });
-          if (ok) showStatus(i18n[currentLang].status_inserted, 'success');
+          const ok = await safeSendMessage(tab.id, { type: 'INSERT_REPLY', text: bodyTextarea.value });
+          if (ok?.success) showStatus(i18n[currentLang].status_inserted, 'success');
+          else showStatus(ok?.error || '插入失败', 'error');
         }
       };
+      
+      // 发布功能 (如果是点击卡片内的发布，我们逻辑上应该是：插入当前内容 + 触发发布)
+      // 但按照用户之前的要求，“发布只是发布”。
+      card.querySelector('.publish-card-btn').onclick = async () => {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id) {
+          const ok = await safeSendMessage(tab.id, { type: 'PUBLISH_REPLY' });
+          if (ok?.success) showStatus(i18n[currentLang].status_published, 'success');
+          else showStatus(ok?.error || '发布失败', 'error');
+        }
+      };
+      
       allResultsDiv.appendChild(card);
     });
   }
@@ -432,7 +489,7 @@ function refreshProviderDatalist() {
       (providerConfigs[key] && providerConfigs[key].apiKey) ||
       (providerConfigs[name] && providerConfigs[name].apiKey) ||
       '';
-    providerConfigs[key] = {
+    const config = {
       name: name,
       baseUrl: baseUrlInput.value.trim(),
       apiKey: isMasked ? oldKey : apiKeyInput.value.trim(),
@@ -440,6 +497,10 @@ function refreshProviderDatalist() {
       protocol: protocol,
       availableModels: customModelsTextarea.value.trim()
     };
+    providerConfigs[key] = config;
+    if (isCustom) {
+      providerConfigs[name] = config;
+    }
   }
 
   async function persistCurrentProviderConfig() {
@@ -450,8 +511,8 @@ function refreshProviderDatalist() {
     const protocol = isCustom ? protocolTypeSelect.value : 'openai';
     const prevCfg = resolveProviderCfg(name, protocol);
     const prevSnapshot = JSON.stringify({
-      provider: name,
-      protocol: prevCfg.protocol || protocol,
+      provider: lastProvider,
+      protocol: lastProtocol,
       baseUrl: prevCfg.baseUrl || '',
       apiKey: prevCfg.apiKey || '',
       selectedModel: prevCfg.selectedModel || '',
@@ -463,6 +524,7 @@ function refreshProviderDatalist() {
 
     const cfg = resolveProviderCfg(name, protocol);
     lastProvider = name;
+    lastProtocol = protocol;
 
     const nextSnapshot = JSON.stringify({
       provider: name,
@@ -489,8 +551,15 @@ function refreshProviderDatalist() {
   }
 
   function loadFromMap(name, protocol) {
-    const targetProtocol = protocol || protocolTypeSelect.value || 'openai';
-    const cfg = resolveProviderCfg(name, targetProtocol);
+    let cfg;
+    if (protocol) {
+      cfg = resolveProviderCfg(name, protocol);
+    } else {
+      cfg = providerConfigs[name] || 
+            providerConfigs[getCfgKey(name, protocolTypeSelect.value)] || 
+            providerConfigs[getCfgKey(name, 'openai')] || 
+            providerConfigs[getCfgKey(name, 'anthropic')] || {};
+    }
     
     if (name === 'glm') {
       baseUrlInput.value = cfg.baseUrl || 'https://open.bigmodel.cn/api/anthropic';
@@ -504,7 +573,6 @@ function refreshProviderDatalist() {
       customModelsTextarea.value = cfg.availableModels || '';
     }
     updateModelDropdown(null, cfg.selectedModel || '');
-    lastProvider = name;
   }
 
   function updatePromptPreview() {
@@ -525,12 +593,22 @@ function refreshProviderDatalist() {
       item.className = 'command-item';
       item.dataset.id = id;
       item.innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin:8px 0 4px;">
-          <span style="font-size:12px; font-weight:700;">${id}</span>
-          <button class="btn-delete" style="font-size:10px; border:none; background:none; cursor:pointer; color:#e0245e;">${i18n[currentLang].cmd_delete}</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0 4px; gap:10px;">
+          <input type="text" class="cmd-id-input" value="${id}" style="flex:1; background:transparent; border:1px solid transparent; color:var(--text-color); font-weight:700; font-size:12px; padding:2px 4px; border-radius:4px; outline:none; transition:all 0.2s;">
+          <button class="btn-delete" style="font-size:10px; border:none; background:none; cursor:pointer; color:#e0245e; flex-shrink:0;">${i18n[currentLang].cmd_delete}</button>
         </div>
         <textarea class="form-input" style="min-height:40px; font-size:12px;">${text}</textarea>
       `;
+      
+      const idInput = item.querySelector('.cmd-id-input');
+      idInput.onfocus = () => { 
+        idInput.style.borderColor = 'var(--border-color)'; 
+        idInput.style.background = 'var(--bg-color)'; 
+      };
+      idInput.onblur = () => { 
+        idInput.style.borderColor = 'transparent'; 
+        idInput.style.background = 'transparent'; 
+      };
       commandListDiv.appendChild(item);
     });
     commandListDiv.querySelectorAll('.btn-delete').forEach(btn => {
@@ -549,7 +627,10 @@ function refreshProviderDatalist() {
   function collectCommandsFromDom() {
     const nextCommands = {};
     commandListDiv.querySelectorAll('.command-item').forEach(item => {
-      nextCommands[item.dataset.id] = item.querySelector('textarea').value;
+      const idInput = item.querySelector('.cmd-id-input');
+      const id = idInput ? idInput.value.trim().toLowerCase() : item.dataset.id;
+      const text = item.querySelector('textarea').value;
+      if (id) nextCommands[id] = text;
     });
     return nextCommands;
   }
@@ -585,15 +666,16 @@ function refreshProviderDatalist() {
         const existing = await storage.get(['cachedModelsByProvider']);
         const cachedModelsByProvider = existing.cachedModelsByProvider || {};
         cachedModelsByProvider[getProviderCacheKey()] = modelIds;
-        storage.set({ cachedModelsByProvider, cachedModels: modelIds });
+        storage.set({ cachedModelsByProvider });
       }
     } catch (e) {} finally { refreshModelsBtn.classList.remove('spinning'); }
   }
 
   // --- 4. Initialization ---
-  const settings = await storage.get(['apiKey', 'baseUrl', 'provider', 'protocol', 'availableModels', 'providerConfigs', 'wordLimit', 'replyLanguage', 'selectedModel', 'cachedModels', 'cachedModelsByProvider', 'commands', 'themeMode', 'language']);
+  const settings = await storage.get(['apiKey', 'baseUrl', 'provider', 'protocol', 'availableModels', 'providerConfigs', 'wordLimit', 'replyLanguage', 'selectedModel', 'cachedModels', 'cachedModelsByProvider', 'commands', 'themeMode', 'language', 'lastSelectedPromptType']);
   providerConfigs = settings.providerConfigs || {};
   lastProvider = settings.provider || 'glm';
+  selectedPromptType = settings.lastSelectedPromptType || 'all';
   providerSelect.value = (lastProvider === 'glm') ? 'glm' : 'custom';
   refreshProviderDatalist();
   if (lastProvider !== 'glm') {
@@ -607,6 +689,7 @@ function refreshProviderDatalist() {
     resolveProviderCfg(lastProvider, protocolTypeSelect.value).protocol ||
     protocolTypeSelect.value ||
     'openai';
+  lastProtocol = resolvedProtocol;
   const currentCfg =
     providerConfigs[getCfgKey(lastProvider, resolvedProtocol)] ||
     providerConfigs[lastProvider] ||
@@ -636,7 +719,7 @@ function refreshProviderDatalist() {
   langSelect.value = currentLang;
   updateUIStrings(currentLang);
   const initialCacheKey = `${lastProvider}|${resolvedProtocol || 'openai'}`;
-  const initialCachedModels = (settings.cachedModelsByProvider && settings.cachedModelsByProvider[initialCacheKey]) || settings.cachedModels || [];
+  const initialCachedModels = (settings.cachedModelsByProvider && settings.cachedModelsByProvider[initialCacheKey]) || [];
   updateModelDropdown(initialCachedModels, currentCfg.selectedModel || settings.selectedModel || '');
   refreshProviderDatalist(); renderQuickCommands(); renderCommands(); refreshPost();
   
@@ -646,21 +729,42 @@ function refreshProviderDatalist() {
 
   async function loadCurrentAccount() {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const nameEl = document.getElementById('assistx-accountName');
+    const handleEl = document.getElementById('assistx-accountHandle');
+    const avatarEl = document.getElementById('assistx-accountAvatar');
+    
     if (tab?.id && (tab?.url?.includes('twitter.com') || tab?.url?.includes('x.com'))) {
         const resp = await safeSendMessage(tab.id, { type: 'GET_ACCOUNT' });
         if (resp?.name) {
-            document.getElementById('assistx-accountName').textContent = resp.name;
-            document.getElementById('assistx-accountHandle').textContent = resp.handle;
-            if (resp.avatar) document.getElementById('assistx-accountAvatar').style.backgroundImage = `url(${resp.avatar})`;
-        } else { document.getElementById('assistx-accountName').textContent = i18n[currentLang].account_unknown; }
+            nameEl.textContent = resp.name;
+            handleEl.textContent = resp.handle;
+            if (resp.avatar) avatarEl.style.backgroundImage = `url(${resp.avatar})`;
+        } else { 
+            nameEl.textContent = i18n[currentLang].account_unknown;
+            handleEl.textContent = '@unknown';
+            avatarEl.style.backgroundImage = 'none';
+        }
+    } else {
+        nameEl.textContent = i18n[currentLang].account_unknown;
+        handleEl.textContent = '@unknown';
+        avatarEl.style.backgroundImage = 'none';
     }
   }
   setTimeout(loadCurrentAccount, 1000);
+  
+  if (refreshAccountBtn) {
+    refreshAccountBtn.addEventListener('click', () => {
+      refreshAccountBtn.classList.add('spinning');
+      loadCurrentAccount().finally(() => {
+        setTimeout(() => refreshAccountBtn.classList.remove('spinning'), 500);
+      });
+    });
+  }
 
   // --- 5. Event Listeners ---
   langSelect.addEventListener('change', (e) => {
     currentLang = e.target.value; updateUIStrings(currentLang);
-    renderQuickCommands(); renderCommands(); storage.set({ language: currentLang });
+    renderQuickCommands(); renderCommands(); renderResultView(); storage.set({ language: currentLang });
   });
   themeToggleBtn.addEventListener('click', () => {
     themeMode = themeMode === 'system' ? 'light' : themeMode === 'light' ? 'dark' : 'system';
@@ -670,14 +774,14 @@ function refreshProviderDatalist() {
     storage.set({ themeMode });
   });
   providerSelect.addEventListener('change', () => {
-    if (providerSelect.value === 'glm') { customSection.style.display = 'none'; loadFromMap('glm', 'openai'); }
+    if (providerSelect.value === 'glm') { customSection.style.display = 'none'; loadFromMap('glm'); }
     else {
       customSection.style.display = 'block';
       refreshProviderDatalist();
       const name = providerNameSelect.value || 'Custom1';
       ensureProviderOption(name);
       providerNameSelect.value = name;
-      loadFromMap(name, protocolTypeSelect.value);
+      loadFromMap(name);
     }
     refreshProviderDatalist();
     persistCurrentProviderConfig();
@@ -686,7 +790,7 @@ function refreshProviderDatalist() {
     if (providerSelect.value !== 'custom') return;
     const name = providerNameSelect.value;
     if (!name) return;
-    loadFromMap(name, protocolTypeSelect.value);
+    loadFromMap(name);
     persistCurrentProviderConfig();
   });
   if (addProviderBtn) {
@@ -696,27 +800,31 @@ function refreshProviderDatalist() {
       const nextName = name.trim();
       ensureProviderOption(nextName);
       providerNameSelect.value = nextName;
-      loadFromMap(nextName, protocolTypeSelect.value);
+      loadFromMap(nextName);
       await persistCurrentProviderConfig();
       refreshProviderDatalist();
     });
   }
+  const debouncedPersist = debounce(persistCurrentProviderConfig, 500);
+
   customModelsTextarea.addEventListener('input', () => {
     updateModelDropdown(null, modelSelect.value);
+    debouncedPersist();
   });
-  customModelsTextarea.addEventListener('blur', persistCurrentProviderConfig);
-  baseUrlInput.addEventListener('blur', persistCurrentProviderConfig);
-  apiKeyInput.addEventListener('blur', persistCurrentProviderConfig);
+  baseUrlInput.addEventListener('input', debouncedPersist);
+  apiKeyInput.addEventListener('input', debouncedPersist);
   protocolTypeSelect.addEventListener('change', () => {
     const name = providerNameSelect.value;
     if (name) loadFromMap(name, protocolTypeSelect.value);
     updateModelDropdown(null, modelSelect.value);
     persistCurrentProviderConfig();
   });
-  wordLimitInput.addEventListener('change', async () => {
+  const saveWordLimit = async () => {
     await storage.set({ wordLimit: parseInt(wordLimitInput.value, 10) || 70 });
     showStatus('已自动保存', 'success', 5000);
-  });
+  };
+  wordLimitInput.addEventListener('change', saveWordLimit);
+  wordLimitInput.addEventListener('input', debounce(saveWordLimit, 500));
   replyLangSelect.addEventListener('change', async () => {
     await storage.set({ replyLanguage: replyLangSelect.value });
     showStatus('已自动保存', 'success', 5000);
@@ -739,6 +847,7 @@ function refreshProviderDatalist() {
       providerSelect.value = 'glm'; customSection.style.display = 'none'; loadFromMap('glm', 'openai');
       refreshProviderDatalist();
       await storage.set({ provider: 'glm', providerConfigs, baseUrl: providerConfigs['glm']?.baseUrl || 'https://open.bigmodel.cn/api/anthropic', apiKey: providerConfigs['glm']?.apiKey || '', selectedModel: providerConfigs['glm']?.selectedModel || '', language: currentLang });
+      lastProvider = 'glm';
       showStatus(i18n[currentLang].status_saved, 'success');
     }
   });
@@ -804,7 +913,8 @@ function refreshProviderDatalist() {
         let s_raw = response.reply.trim();
         if (s_raw.startsWith('```')) s_raw = s_raw.replace(/^```(json)?\n?/, '').replace(/\n?```$/, '');
         try { candidateReplies = JSON.parse(s_raw); } catch (e) { candidateReplies = { default: response.reply }; }
-        selectedPromptType = 'all'; renderQuickCommands(); placeholder.style.display = 'none'; renderResultView();
+        selectedPromptType = selectedPromptType || 'all'; 
+        renderQuickCommands(); placeholder.style.display = 'none'; renderResultView();
         const duration = ((Date.now() - startTime) / 1000).toFixed(1);
         timeNumSpan.textContent = duration; generationTimeDiv.style.display = 'block'; stopCountdown();
       } else { placeholder.innerHTML = `<div style="padding:20px; text-align:center; color:#e0245e;">${dict.gen_error + ': ' + (response?.error || '')}</div>`; generationTimeDiv.style.display = 'none'; stopCountdown(); }
@@ -816,9 +926,41 @@ function refreshProviderDatalist() {
     }
   });
 
+  copyBtn.addEventListener('click', () => {
+    if (!responseTextarea.value) return;
+    navigator.clipboard.writeText(responseTextarea.value);
+    showStatus(i18n[currentLang].status_copied, 'success');
+  });
+
+  insertBtn.addEventListener('click', async () => {
+    if (!responseTextarea.value) return;
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab?.id) {
+      const ok = await safeSendMessage(tab.id, { type: 'INSERT_REPLY', text: responseTextarea.value });
+      if (ok?.success) showStatus(i18n[currentLang].status_inserted, 'success');
+      else showStatus(ok?.error || '插入失败', 'error');
+    }
+  });
+
+  publishBtn.addEventListener('click', async () => {
+    if (!responseTextarea.value) return;
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab?.id) {
+      const ok = await safeSendMessage(tab.id, { type: 'PUBLISH_REPLY' });
+      if (ok?.success) showStatus(i18n[currentLang].status_published, 'success');
+      else showStatus(ok?.error || '发布失败', 'error');
+    }
+  });
+
   quickCmdsDiv.addEventListener('click', (e) => {
     const btn = e.target.closest('.quick-cmd');
-    if (btn) { selectedPromptType = btn.dataset.prompt; renderQuickCommands(); renderResultView(); if (promptPreviewTextarea.style.display === 'block') updatePromptPreview(); }
+    if (btn) {
+      selectedPromptType = btn.dataset.prompt;
+      storage.set({ lastSelectedPromptType: selectedPromptType });
+      renderQuickCommands();
+      renderResultView();
+      if (promptPreviewTextarea.style.display === 'block') updatePromptPreview();
+    }
   });
 
   expandPromptBtn.addEventListener('click', () => {
@@ -844,19 +986,28 @@ function refreshProviderDatalist() {
 
   clearManualInput.addEventListener('click', () => { manualInputTextarea.value = ''; manualInputTextarea.focus(); updatePromptPreview(); });
   commandSearchInput.addEventListener('input', (e) => renderCommands(e.target.value.toLowerCase()));
-  commandListDiv.addEventListener('focusout', async (e) => {
-    if (e.target.tagName !== 'TEXTAREA') return;
+  const saveCommands = async () => {
     commands = collectCommandsFromDom();
     await storage.set({ commands });
     renderQuickCommands();
     showStatus('已自动保存', 'success', 5000);
+  };
+  const debouncedSaveCommands = debounce(saveCommands, 500);
+  commandListDiv.addEventListener('focusout', async (e) => {
+    if (e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') return;
+    saveCommands();
+  });
+  commandListDiv.addEventListener('input', (e) => {
+    if (e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') return;
+    debouncedSaveCommands();
   });
   if (saveCommandsBtn) {
     saveCommandsBtn.addEventListener('click', async () => {
-      const newCommands = {};
-      commandListDiv.querySelectorAll('.command-item').forEach(item => { newCommands[item.dataset.id] = item.querySelector('textarea').value; });
-      commands = newCommands; await storage.set({ commands });
-      renderQuickCommands(); showStatus(i18n[currentLang].status_copied, 'success');
+      commands = collectCommandsFromDom();
+      await storage.set({ commands });
+      renderCommands();
+      renderQuickCommands();
+      showStatus(i18n[currentLang].status_saved || 'Saved', 'success');
     });
   }
 
@@ -909,6 +1060,8 @@ function refreshProviderDatalist() {
     } catch (e) { showStatus(dict.test_failed + e.message, 'error'); }
     finally { testBtn.disabled = false; testBtn.textContent = dict.test_conn; }
   });
+
+  responseTextarea.addEventListener('input', updateWordCount);
 
   function showStatus(msg, type, duration = 3000) {
     statusDiv.textContent = msg; statusDiv.className = `status-message ${type}`;

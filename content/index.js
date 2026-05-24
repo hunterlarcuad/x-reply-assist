@@ -146,9 +146,16 @@ function handleInsertReply(text, sendResponse) {
 }
 
 function handlePublishReply(sendResponse) {
-  const replyButton = document.querySelector('[data-testid="tweetButtonInline"]');
-  if (replyButton) {
+  const replyButton = document.querySelector('[data-testid="tweetButtonInline"]') || 
+                      document.querySelector('[data-testid="tweetButton"]');
+  
+  if (replyButton && !replyButton.disabled) {
     replyButton.click();
     sendResponse({ success: true });
-  } else { sendResponse({ success: false, error: '未找到发布按钮' }); }
+  } else {
+    sendResponse({ 
+      success: false, 
+      error: replyButton ? (replyButton.disabled ? '发布按钮未启用(请先插入内容)' : '发布异常') : '未找到发布按钮' 
+    });
+  }
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AssistX - Smart AI Reply",
-  "version": "0.1.0",
+  "version": "1.1.1",
   "description": "Smart AI replies for Twitter/X using ZhipuAI GLM model.",
   "permissions": ["storage", "activeTab", "scripting", "sidePanel"],
   "host_permissions": [
